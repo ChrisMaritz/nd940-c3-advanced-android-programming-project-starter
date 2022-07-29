@@ -3,10 +3,7 @@ package com.udacity
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.view.updateLayoutParams
@@ -30,13 +27,15 @@ class LoadingButton @JvmOverloads constructor(
     var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
         when(new){
             ButtonState.Loading -> {
-                loadingAnimation()?.start()
+                loadingAnimator?.start()
             }
             ButtonState.Completed -> {
-                loadingAnimation()?.end()
+                loadingAnimator?.end()
             }
         }
     }
+
+  val loadingAnimator = loadingAnimation()
 
 
     init {
@@ -56,26 +55,37 @@ class LoadingButton @JvmOverloads constructor(
         paint.style = Paint.Style.FILL
         val length = 320
         val height = 16
-        val rect: Rect = Rect(0, 100,600,0)
+        val rect: Rect = Rect(0, heightSize,width,0)
         canvas?.drawRect(rect, paint)
+
         paint.color = Color.BLACK
+        paint.textSize = 30.0f
+        paint.textAlign = Paint.Align.CENTER
+        //paint.typeface = Typeface.create("", Typeface.BOLD)
+        canvas?.drawText(
+            "Downloading",
+            width / 2.toFloat(),
+            (heightSize + 30) / 2.toFloat(),
+            paint
+        )
+
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 4f
-        val rect2: Rect = Rect(0, 101,601,0)
+        val rect2: Rect = Rect(0, heightSize + 1,width + 1,0)
         canvas?.drawRect(rect2, paint)
     }
     private fun loadingMain1(canvas: Canvas?) {
         paint.color = Color.GREEN
         paint.style = Paint.Style.FILL
         val length = 320
-        val height = 16
-        val rect3: Rect = Rect(0, 101,progress,0)
+        val height = heightSize
+        val rect3: Rect = Rect(0, height,progress,0)
         canvas?.drawRect(rect3, paint)
     }
 
+
     fun loadingAnimation(): ValueAnimator? {
         val initialValue = 0
-        val finalValue = 600
+        val finalValue = 1000
 
         val loadingAnimator = ValueAnimator.ofInt(
             initialValue,

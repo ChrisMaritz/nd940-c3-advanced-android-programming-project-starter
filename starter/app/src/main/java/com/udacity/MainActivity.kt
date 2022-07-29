@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,16 +31,36 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
+
+
         custom_button.setOnClickListener {
             download()
+            custom_button.buttonState = ButtonState.Loading
+
+
         }
     }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE)
+                    as DownloadManager
+
+            val cursor = downloadManager.query(DownloadManager
+                .Query()
+                .setFilterById(downloadID))
+
+            val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+
+            if(status == DownloadManager.STATUS_SUCCESSFUL){
+                custom_button.buttonState = ButtonState.Completed
+                Log.i("Download", "Hello")
+            }
         }
     }
+
+
 
     private fun download() {
         val request =
@@ -53,6 +74,8 @@ class MainActivity : AppCompatActivity() {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+
+
     }
 
     companion object {

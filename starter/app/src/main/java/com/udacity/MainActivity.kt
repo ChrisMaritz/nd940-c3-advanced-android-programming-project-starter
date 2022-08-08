@@ -30,9 +30,6 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
-
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
     private lateinit var title : String
     var url: String? = null
     var notificationManager : NotificationManager? = null
@@ -109,7 +106,6 @@ class MainActivity : AppCompatActivity() {
                     getString(R.string.notification_complete),
                     "download complete"
                 )
-                DetailText("completed", title)
                 notificationManager?.sendNotification("Download done", this@MainActivity)
                 Log.i("Download", "Hello")
             }else if(status == DownloadManager.STATUS_FAILED){
@@ -117,7 +113,6 @@ class MainActivity : AppCompatActivity() {
                 Log.i("Download", "Failed")
                 status1 = "failed"
                 custom_button.buttonState = ButtonState.Failed
-                DetailText("failed", title)
                 notificationManager?.sendNotification("Download failed", this@MainActivity)
             }
         }
@@ -139,18 +134,6 @@ class MainActivity : AppCompatActivity() {
             downloadManager.enqueue(request)
 
 
-    }
-
-    private fun radioButton(radioButton: RadioButton){
-        when(radioButton.id){
-
-        }
-    }
-
-    companion object {
-        const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
-        const val CHANNEL_ID = "channelId"
     }
 
     private fun createChannel(channelId : String, channelName : String){
@@ -198,6 +181,8 @@ class MainActivity : AppCompatActivity() {
             .setSmallIcon(R.drawable.ic_assistant_black_24dp)
             .setContentIntent(contentPendingIntent)
             .setAutoCancel(true)
+            .setColor(resources.getColor(R.color.colorAccent))
+            .setContentText("Click this to open details")
         notify(1, builder.build())
     }
 

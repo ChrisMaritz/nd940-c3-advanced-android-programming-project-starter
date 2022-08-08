@@ -21,12 +21,7 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
-
-    private var loadingLong = ObjectAnimator()
     private var progress = 0
-    private val mainColor = Color.CYAN
-    private val size = 320
-    var rect: Rect = Rect(0, 100, right, 0)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
 

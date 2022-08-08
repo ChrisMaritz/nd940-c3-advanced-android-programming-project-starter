@@ -2,10 +2,17 @@ package com.udacity
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
 import android.view.View
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import kotlin.properties.Delegates
 
@@ -28,9 +35,17 @@ class LoadingButton @JvmOverloads constructor(
         when(new){
             ButtonState.Loading -> {
                 loadingAnimator?.start()
+                Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+
             }
             ButtonState.Completed -> {
                 loadingAnimator?.end()
+                Toast.makeText(context, "Download finished", Toast.LENGTH_SHORT).show()
+            }
+
+            ButtonState.Failed -> {
+                loadingAnimator?.end()
+                Toast.makeText(context, "Download Failed, Try again", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -51,37 +66,36 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private fun loadingMain(canvas: Canvas?){
-        paint.color = mainColor
+        paint.color = resources.getColor(R.color.colorPrimary)
         paint.style = Paint.Style.FILL
         val length = 320
         val height = 16
         val rect: Rect = Rect(0, heightSize,width,0)
         canvas?.drawRect(rect, paint)
 
+        //paint.typeface = Typeface.create("", Typeface.BOLD)
+
         paint.color = Color.BLACK
         paint.textSize = 30.0f
         paint.textAlign = Paint.Align.CENTER
-        //paint.typeface = Typeface.create("", Typeface.BOLD)
         canvas?.drawText(
-            "Downloading",
+            "Download",
             width / 2.toFloat(),
             (heightSize + 30) / 2.toFloat(),
             paint
         )
-
         paint.style = Paint.Style.STROKE
         val rect2: Rect = Rect(0, heightSize + 1,width + 1,0)
         canvas?.drawRect(rect2, paint)
     }
     private fun loadingMain1(canvas: Canvas?) {
-        paint.color = Color.GREEN
+        paint.color = resources.getColor(R.color.colorAccent)
         paint.style = Paint.Style.FILL
         val length = 320
         val height = heightSize
         val rect3: Rect = Rect(0, height,progress,0)
         canvas?.drawRect(rect3, paint)
     }
-
 
     fun loadingAnimation(): ValueAnimator? {
         val initialValue = 0
@@ -92,7 +106,7 @@ class LoadingButton @JvmOverloads constructor(
             finalValue
         )
 
-        loadingAnimator.duration = 1000
+        loadingAnimator.duration = 3500
         loadingAnimator.repeatMode = ValueAnimator.RESTART
         loadingAnimator.repeatCount = ValueAnimator.INFINITE
 
@@ -117,5 +131,6 @@ class LoadingButton @JvmOverloads constructor(
         heightSize = h
         setMeasuredDimension(w, h)
     }
+
 
 }

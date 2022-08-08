@@ -1,19 +1,25 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.RadioButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModel
 
@@ -25,11 +31,13 @@ class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
 
-    private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
-    private lateinit var url : String
     private lateinit var title : String
+    var url: String? = null
+    var notificationManager : NotificationManager? = null
+    var completeOrNot = false
+    var status1 = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +45,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+
+        notificationManager = ContextCompat.getSystemService(
+            this,
+            NotificationManager::class.java
+        ) as NotificationManager
 
         val radioButtonGlide = findViewById<View>(R.id.glide_button)
         val radioButtonRetro = findViewById<View>(R.id.retrofit_button)
@@ -63,6 +76,10 @@ class MainActivity : AppCompatActivity() {
 
 
         custom_button.setOnClickListener {
+            if(url == null){
+                Toast.makeText(applicationContext, "Please select link", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             custom_button.buttonState = ButtonState.Loading
             download()
         }
@@ -85,10 +102,23 @@ class MainActivity : AppCompatActivity() {
             val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
 
             if(status == DownloadManager.STATUS_SUCCESSFUL){
+                completeOrNot = true
                 custom_button.buttonState = ButtonState.Completed
+                status1 = "complete"
+                createChannel(
+                    getString(R.string.notification_complete),
+                    "download complete"
+                )
+                DetailText("completed", title)
+                notificationManager?.sendNotification("Download done", this@MainActivity)
                 Log.i("Download", "Hello")
             }else if(status == DownloadManager.STATUS_FAILED){
+                completeOrNot = false
                 Log.i("Download", "Failed")
+                status1 = "failed"
+                custom_button.buttonState = ButtonState.Failed
+                DetailText("failed", title)
+                notificationManager?.sendNotification("Download failed", this@MainActivity)
             }
         }
     }
@@ -106,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
-            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+            downloadManager.enqueue(request)
 
 
     }
@@ -118,9 +148,59 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
+        const val URL =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
-        private const val CHANNEL_ID = "channelId"
+        const val CHANNEL_ID = "channelId"
     }
+
+    private fun createChannel(channelId : String, channelName : String){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_LOW
+            )
+
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Download Complete"
+
+            val notificationManager = this@MainActivity.getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+
+        }
+
+    }
+
+    fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context){
+        val contentIntent = Intent(applicationContext, DetailActivity::class.java)
+
+        contentIntent.putExtra("STATUS_HERE", status1)
+        contentIntent.putExtra("TITLE", title)
+        val contentPendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            1,
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+
+        val builder = NotificationCompat.Builder(
+            applicationContext,
+            applicationContext.getString(R.string.notification_complete)
+        )
+            .setContentTitle(applicationContext
+                .getString(R.string.notification_title))
+            .setContentText(messageBody)
+            .setSmallIcon(R.drawable.ic_assistant_black_24dp)
+            .setContentIntent(contentPendingIntent)
+            .setAutoCancel(true)
+        notify(1, builder.build())
+    }
+
+
 
 }

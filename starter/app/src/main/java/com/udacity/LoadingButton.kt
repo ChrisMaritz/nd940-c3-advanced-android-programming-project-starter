@@ -1,20 +1,15 @@
 package com.udacity
 
-import android.animation.ObjectAnimator
+import android.R.attr.strokeWidth
 import android.animation.ValueAnimator
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.graphics.*
-import android.os.Build
+import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.updateLayoutParams
 import kotlin.properties.Delegates
+
 
 class LoadingButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -57,6 +52,7 @@ class LoadingButton @JvmOverloads constructor(
         super.onDraw(canvas)
         loadingMain(canvas)
         loadingMain1(canvas)
+        drawCircle(canvas)
 
     }
 
@@ -102,6 +98,27 @@ class LoadingButton @JvmOverloads constructor(
         )
 
         loadingAnimator.duration = 3500
+        loadingAnimator.repeatMode = ValueAnimator.REVERSE
+        loadingAnimator.repeatCount = ValueAnimator.INFINITE
+
+        loadingAnimator.addUpdateListener {
+            progress = it.animatedValue as Int
+            this@LoadingButton.invalidate()
+        }
+
+        return loadingAnimator
+    }
+
+    fun circleAnimation(): ValueAnimator?{
+        val initialValue = 0
+        val finalValue = 1000
+
+        val loadingAnimator = ValueAnimator.ofInt(
+            initialValue,
+            finalValue
+        )
+
+        loadingAnimator.duration = 3500
         loadingAnimator.repeatMode = ValueAnimator.RESTART
         loadingAnimator.repeatCount = ValueAnimator.INFINITE
 
@@ -111,6 +128,18 @@ class LoadingButton @JvmOverloads constructor(
         }
 
         return loadingAnimator
+    }
+
+    fun drawCircle(canvas: Canvas?){
+        val paint1 = Paint()
+        paint1.setStyle(Paint.Style.FILL)
+        paint1.color = Color.CYAN
+        val rectF: RectF = RectF(200.0f, 400.0f, 200.0f, 400.0f)
+
+       // canvas?.drawRect(rectF, paint1)
+
+        canvas?.drawArc(rectF, 0.0f, 120.0f, false, paint1)
+
     }
 
 

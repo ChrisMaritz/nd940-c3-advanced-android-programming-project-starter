@@ -179,10 +179,11 @@ class MainActivity : AppCompatActivity() {
                 .getString(R.string.notification_title))
             .setContentText(messageBody)
             .setSmallIcon(R.drawable.ic_assistant_black_24dp)
-            .setContentIntent(contentPendingIntent)
+//            .setContentIntent(contentPendingIntent)
             .setAutoCancel(true)
             .setColor(resources.getColor(R.color.colorAccent))
-            .setContentText("Click this to open details")
+            .setContentText("Expand to open details button")
+            .addAction(R.drawable.abc_vector_test, "Details", contentPendingIntent)
         notify(1, builder.build())
     }
 
